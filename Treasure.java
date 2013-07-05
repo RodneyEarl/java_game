@@ -21,7 +21,7 @@ public class Treasure extends Sprite{
     	
         super(xPos, yPos);
         
-        ImageIcon ii = new ImageIcon(this.getClass().getResource("baggage.png"));
+        ImageIcon ii = new ImageIcon(this.getClass().getResource("chest.png"));
         image = ii.getImage();
     }
 

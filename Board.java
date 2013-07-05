@@ -4,10 +4,16 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 /**
  * Class for the board of the game.
@@ -32,6 +38,14 @@ public class Board extends JPanel implements Commons {
 	 */
 	private ArrayList<Tree> trees = new ArrayList<Tree>();
 	/**
+	 * Arraylist containing the ships of the game.
+	 */
+	private ArrayList<Ship> ships = new ArrayList<Ship>();
+	/**
+	 * Arraylist containing the water blocks in the game.
+	 */
+	private ArrayList<Water> water = new ArrayList<Water>();
+	/**
 	 * Arraylist containing the chests of the game.
 	 */
 	private ArrayList<Treasure> chests = new ArrayList<Treasure>();
@@ -40,12 +54,23 @@ public class Board extends JPanel implements Commons {
 	 */
 	private ArrayList<Goal> goals = new ArrayList<Goal>();
 
+	private SimpleDateFormat sdf;
+	
+	private Timer timer;
+	
+	private long timeRemaining;
+	
+	private boolean outOfTime = false;
+	
+	private int currentScore;
+	
 	/**
 	 * Constructor for the board.
 	 */
 	public Board() {
 		addKeyListener(new MyKeyAdapter());
 		setFocusable(true);
+		sdf = new SimpleDateFormat("mm : ss");
 		initWorld(levelOne);
 	}
 
@@ -61,6 +86,8 @@ public class Board extends JPanel implements Commons {
 		int y = OFFSET;
 
 		Tree tree;
+		Ship ship;
+		Water waterBlock;
 		Treasure chest;
 		Goal goal;
 
@@ -71,9 +98,17 @@ public class Board extends JPanel implements Commons {
 			if (item == '\n') {
 				y += SPRITE_WIDTH;
 				x = OFFSET;
-			} else if (item == '#') {
+			} else if (item == 'T') {
 				tree = new Tree(x, y);
 				trees.add(tree);
+				x += SPRITE_WIDTH;
+			} else if(item == 'W'){
+				waterBlock = new Water(x,y);
+				water.add(waterBlock);
+				x += SPRITE_WIDTH;
+			} else if(item == 'S'){
+				ship = new Ship(x,y);
+				ships.add(ship);
 				x += SPRITE_WIDTH;
 			} else if (item == '$') {
 				chest = new Treasure(x, y);
@@ -89,6 +124,11 @@ public class Board extends JPanel implements Commons {
 			} else if (item == ' ') {
 				x += SPRITE_WIDTH;
 			}
+			
+			timeRemaining = GAME_TIME;
+			timer = new Timer(1000, new CountDownTimer());
+			timer.start();
+			currentScore = 0;
 		}
 	}
 
@@ -105,6 +145,8 @@ public class Board extends JPanel implements Commons {
 
 		ArrayList<Sprite> world = new ArrayList<Sprite>();
 		world.addAll(trees);
+		world.addAll(ships);
+		world.addAll(water);
 		world.addAll(goals);
 		world.addAll(chests);
 		world.add(player);
@@ -119,20 +161,33 @@ public class Board extends JPanel implements Commons {
 			} else {
 				g.drawImage(item.getImage(), item.getX(), item.getY(), this);
 			}
+			
+			if(0==timeRemaining)
+				finished = true;
 
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.setColor(Color.BLACK);
+			g2d.setFont(new Font("Verdana", Font.BOLD, 24));
+			g2d.drawString(sdf.format(new Date(timeRemaining)), BOARD_WIDTH - 150, OFFSET*8);
+			
+			g2d.drawString(currentScore + "/" + goals.size(),BOARD_WIDTH/2 - 25, OFFSET*8);
+			
 			if (finished) {
 				SoundEffect.SONG.stoploop();
-				Graphics2D g2d = (Graphics2D) g;
-				g2d.setColor(Color.WHITE);
-				g2d.setFont(new Font("Comic Sans MS", Font.BOLD, 48));
-				g2d.drawString("Game Over", OFFSET*3, BOARD_HEIGHT - 100);
+				timer.stop();
+				
+				g2d.setColor(Color.BLACK);
+				g2d.setFont(new Font("Verdana", Font.BOLD, 48));
+				g2d.drawString("Game Over", BOARD_WIDTH/2 - 125, BOARD_HEIGHT/2);
+				if(outOfTime)
+					g2d.drawString("Out of Time", BOARD_WIDTH/2 - 125, BOARD_HEIGHT/2 + 50);
 
 				g2d.setColor(Color.GRAY);
-				g2d.setFont(new Font("Comic Sans MS", Font.BOLD, 24));
+				g2d.setFont(new Font("Verdana", Font.BOLD, 24));
 				g2d.drawString("Game made by Bowen Hui and Rodney Earl", OFFSET,
-						BOARD_HEIGHT - 70);
-				g2d.drawString("Music from Kevin MacLeod", OFFSET, BOARD_HEIGHT - 40);
-				g2d.drawString("Sound effects from MediaCollege.com", OFFSET, BOARD_HEIGHT - 10);
+						BOARD_HEIGHT - 100);
+				g2d.drawString("Music from Kevin MacLeod", OFFSET, BOARD_HEIGHT - 70);
+				g2d.drawString("Sound effects from MediaCollege.com", OFFSET, BOARD_HEIGHT - 40);
 			}
 
 		}
@@ -369,6 +424,8 @@ public class Board extends JPanel implements Commons {
 				}
 			}
 
+			currentScore = completed;
+			
 			if (completed == goals.size()) {
 				finished = true;
 				repaint();
@@ -387,6 +444,18 @@ public class Board extends JPanel implements Commons {
 			if (finished) {
 				finished = false;
 			}
+		}
+	}
+	
+	private class CountDownTimer implements ActionListener{
+		
+		public void actionPerformed(ActionEvent ae){
+			timeRemaining -= 1000;
+			
+			if(0 == timeRemaining){
+				outOfTime = true;
+			}
+			repaint();
 		}
 	}
 }

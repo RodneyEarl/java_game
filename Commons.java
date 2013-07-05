@@ -18,9 +18,9 @@ public interface Commons {
 	/**
 	 * Width/height of a sprite.  All sprites are square.
 	 */
-	public static final int SPRITE_WIDTH = 35;
+	public static final int SPRITE_WIDTH = 60;
 
-	public static final int OFFSET = 30;
+	public static final int OFFSET = 5;
 	/**
 	 * Number for top collisions.
 	 */
@@ -38,42 +38,24 @@ public interface Commons {
 	 */
 	public static final int LEFT_COLLISION = 4;
 	/**
-	 * String containing a basic level layout.
+	 * Time, in milliseconds, that a level can run.
 	 */
-	public static final String levelZero = 
-            "    ######\n"
-          + "    ##   #\n"
-          + "    ##$  #\n"
-          + "  ####  $##\n"
-          + "  ##  $ $ #\n"
-          + "#### # ## #   ######\n"
-          + "##   # ## #####  ..#\n"
-          + "## $  $          ..#\n"
-          + "###### ### #@##  ..#\n"
-          + "    ##     #########\n"
-          + "    ########\n";
+	public static final int GAME_TIME = 10000;
 	/**
-	 * String containing a more complex level.
+	 * String containing a level layout.
 	 */
 	public static final String levelOne =
-			 "     #####            \n"
-			+"     #...#            \n"
-			+"     #   #            \n"
-			+"     #   #            \n"
-			+"     ## ##            \n"
-			+"      # #             \n"
-			+"####### #####         \n"
-			+"#   #       #         \n"
-			+"#   #      $##        \n"
-			+"# $   ###  $ #        \n"
-			+"#     ### ## #   #####\n"
-			+"#         ## #####  .#\n"
-			+"#  ######$        @ .#\n"
-			+"#    $    # ### ##  .#\n"
-			+"#       ### ### ######\n"
-			+"##      #   ### #     \n"
-			+" #      #   ### #     \n"
-			+" ###         $  #     \n"
-			+"   #        #####     \n"
-			+"   ##########         \n";
+			 "WSSSWWWWWWWWWWWW\n"
+			+"W...T     T    W\n"
+			+"W   T $   $$TT W\n"
+			+"W   T       TT W\n"
+			+"WT@TTTT        W\n"
+			+"W       TTTT$  W\n"
+			+"W       TTTT   W\n"
+			+"W       TTTT   W\n"
+			+"W            TTW\n"
+			+"W TT TT$      .S\n"
+			+"W     $  TT   .S\n"
+			+"W       TTT   .S\n"
+			+"WWWWWWWWWWWWWWWW";
 }

@@ -1,5 +1,8 @@
 
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+
 import javax.swing.JFrame;
 
 /**
@@ -21,9 +24,9 @@ public class Game extends JFrame implements Commons {
 		SoundEffect.vol = SoundEffect.Volume.LOW;
 		SoundEffect.SONG.playloop();
 
-		add(board);
+		add(board, BorderLayout.CENTER);
 
-		setTitle("Title");
+		setTitle("Treasure Hunt");
 		setSize(BOARD_WIDTH, BOARD_HEIGHT);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

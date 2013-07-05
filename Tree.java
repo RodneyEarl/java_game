@@ -20,7 +20,7 @@ public class Tree extends Sprite{
 	public Tree(int xPos, int yPos){
 		
 		super(xPos, yPos);
-		ImageIcon ii = new ImageIcon(this.getClass().getResource("wall.png"));
+		ImageIcon ii = new ImageIcon(this.getClass().getResource("tree.png"));
 		image = ii.getImage();
 	}
 }
