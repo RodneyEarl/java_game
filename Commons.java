@@ -40,7 +40,7 @@ public interface Commons {
 	/**
 	 * Time, in milliseconds, that a level can run.
 	 */
-	public static final int GAME_TIME = 10000;
+	public static final int GAME_TIME = 240000;
 	/**
 	 * String containing a level layout.
 	 */

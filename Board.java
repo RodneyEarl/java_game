@@ -1,5 +1,3 @@
-
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -14,6 +12,8 @@ import java.util.Date;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
+//import java.util.Timer;
 
 /**
  * Class for the board of the game.
@@ -55,15 +55,23 @@ public class Board extends JPanel implements Commons {
 	private ArrayList<Goal> goals = new ArrayList<Goal>();
 
 	private SimpleDateFormat sdf;
-	
+
 	private Timer timer;
-	
+
 	private long timeRemaining;
-	
+
 	private boolean outOfTime = false;
-	
+
 	private int currentScore;
-	
+
+	long start;
+
+	long current;
+
+	long end;
+
+	long previous;
+
 	/**
 	 * Constructor for the board.
 	 */
@@ -102,12 +110,12 @@ public class Board extends JPanel implements Commons {
 				tree = new Tree(x, y);
 				trees.add(tree);
 				x += SPRITE_WIDTH;
-			} else if(item == 'W'){
-				waterBlock = new Water(x,y);
+			} else if (item == 'W') {
+				waterBlock = new Water(x, y);
 				water.add(waterBlock);
 				x += SPRITE_WIDTH;
-			} else if(item == 'S'){
-				ship = new Ship(x,y);
+			} else if (item == 'S') {
+				ship = new Ship(x, y);
 				ships.add(ship);
 				x += SPRITE_WIDTH;
 			} else if (item == '$') {
@@ -124,12 +132,12 @@ public class Board extends JPanel implements Commons {
 			} else if (item == ' ') {
 				x += SPRITE_WIDTH;
 			}
-			
-			timeRemaining = GAME_TIME;
-			timer = new Timer(1000, new CountDownTimer());
-			timer.start();
-			currentScore = 0;
 		}
+
+		currentScore = 0;
+		timeRemaining = GAME_TIME;
+		timer = new Timer(1000, new CDT());
+		timer.start();
 	}
 
 	/**
@@ -161,33 +169,39 @@ public class Board extends JPanel implements Commons {
 			} else {
 				g.drawImage(item.getImage(), item.getX(), item.getY(), this);
 			}
-			
-			if(0==timeRemaining)
+
+			if (outOfTime)
 				finished = true;
 
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.setColor(Color.BLACK);
 			g2d.setFont(new Font("Verdana", Font.BOLD, 24));
-			g2d.drawString(sdf.format(new Date(timeRemaining)), BOARD_WIDTH - 150, OFFSET*8);
-			
-			g2d.drawString(currentScore + "/" + goals.size(),BOARD_WIDTH/2 - 25, OFFSET*8);
-			
+			g2d.drawString(sdf.format(new Date(timeRemaining)),
+					BOARD_WIDTH - 150, OFFSET * 8);
+
+			g2d.drawString(currentScore + "/" + goals.size(),
+					BOARD_WIDTH / 2 - 25, OFFSET * 8);
+
 			if (finished) {
 				SoundEffect.SONG.stoploop();
 				timer.stop();
-				
+
 				g2d.setColor(Color.BLACK);
 				g2d.setFont(new Font("Verdana", Font.BOLD, 48));
-				g2d.drawString("Game Over", BOARD_WIDTH/2 - 125, BOARD_HEIGHT/2);
-				if(outOfTime)
-					g2d.drawString("Out of Time", BOARD_WIDTH/2 - 125, BOARD_HEIGHT/2 + 50);
+				g2d.drawString("Game Over", BOARD_WIDTH / 2 - 125,
+						BOARD_HEIGHT / 2);
+				if (outOfTime)
+					g2d.drawString("Out of Time", BOARD_WIDTH / 2 - 125,
+							BOARD_HEIGHT / 2 + 50);
 
 				g2d.setColor(Color.GRAY);
 				g2d.setFont(new Font("Verdana", Font.BOLD, 24));
-				g2d.drawString("Game made by Bowen Hui and Rodney Earl", OFFSET,
-						BOARD_HEIGHT - 100);
-				g2d.drawString("Music from Kevin MacLeod", OFFSET, BOARD_HEIGHT - 70);
-				g2d.drawString("Sound effects from MediaCollege.com", OFFSET, BOARD_HEIGHT - 40);
+				g2d.drawString("Game made by Bowen Hui and Rodney Earl",
+						OFFSET, BOARD_HEIGHT - 100);
+				g2d.drawString("Music from Kevin MacLeod", OFFSET,
+						BOARD_HEIGHT - 70);
+				g2d.drawString("Sound effects from MediaCollege.com", OFFSET,
+						BOARD_HEIGHT - 40);
 			}
 
 		}
@@ -220,6 +234,12 @@ public class Board extends JPanel implements Commons {
 				if (checkTreeCollision(TOP_COLLISION, player)) {
 					return;
 				}
+				if (checkWaterCollision(TOP_COLLISION, player)) {
+					return;
+				}
+				if (checkShipCollision(TOP_COLLISION, player)) {
+					return;
+				}
 
 				if (checkChestCollision(TOP_COLLISION)) {
 					return;
@@ -228,6 +248,12 @@ public class Board extends JPanel implements Commons {
 				player.move(0, -SPRITE_WIDTH);
 			} else if (key == KeyEvent.VK_RIGHT) {
 				if (checkTreeCollision(RIGHT_COLLISION, player)) {
+					return;
+				}
+				if (checkWaterCollision(RIGHT_COLLISION, player)) {
+					return;
+				}
+				if (checkShipCollision(RIGHT_COLLISION, player)) {
 					return;
 				}
 
@@ -240,6 +266,12 @@ public class Board extends JPanel implements Commons {
 				if (checkTreeCollision(BOTTOM_COLLISION, player)) {
 					return;
 				}
+				if (checkWaterCollision(BOTTOM_COLLISION, player)) {
+					return;
+				}
+				if (checkShipCollision(BOTTOM_COLLISION, player)) {
+					return;
+				}
 
 				if (checkChestCollision(BOTTOM_COLLISION)) {
 					return;
@@ -248,6 +280,12 @@ public class Board extends JPanel implements Commons {
 				player.move(0, SPRITE_WIDTH);
 			} else if (key == KeyEvent.VK_LEFT) {
 				if (checkTreeCollision(LEFT_COLLISION, player)) {
+					return;
+				}
+				if (checkWaterCollision(LEFT_COLLISION, player)) {
+					return;
+				}
+				if (checkShipCollision(LEFT_COLLISION, player)) {
 					return;
 				}
 
@@ -269,7 +307,7 @@ public class Board extends JPanel implements Commons {
 		 * @param type
 		 *            What type of collision; top, right, bottom, or left.
 		 * @param object
-		 *            Object that is being checked if it will collide witha
+		 *            Object that is being checked if it will collide with a
 		 *            tree.
 		 * @return True if there is a collision, false otherwise.
 		 */
@@ -308,6 +346,94 @@ public class Board extends JPanel implements Commons {
 		}
 
 		/**
+		 * Method to check if an object is going to collide with a ship.
+		 * 
+		 * @param type
+		 *            What type of collision; top, right, bottom, or left.
+		 * @param object
+		 *            Object that is being checked if it will collide with a
+		 *            ship.
+		 * @return True if there is a collision, false otherwise.
+		 */
+		private boolean checkShipCollision(int type, Sprite object) {
+
+			if (type == TOP_COLLISION) {
+				for (int index = 0; index < ships.size(); index++) {
+					Ship ship = ships.get(index);
+					if (object.isTopCollision(ship))
+						return true;
+				}
+				return false;
+			} else if (type == RIGHT_COLLISION) {
+				for (int index = 0; index < ships.size(); index++) {
+					Ship ship = ships.get(index);
+					if (object.isRightCollision(ship))
+						return true;
+				}
+				return false;
+			} else if (type == BOTTOM_COLLISION) {
+				for (int index = 0; index < ships.size(); index++) {
+					Ship ship = ships.get(index);
+					if (object.isBottomCollision(ship))
+						return true;
+				}
+				return false;
+			} else if (type == LEFT_COLLISION) {
+				for (int index = 0; index < ships.size(); index++) {
+					Ship ship = ships.get(index);
+					if (object.isLeftCollision(ship))
+						return true;
+				}
+				return false;
+			}
+			return false;
+		}
+
+		/**
+		 * Method to check if an object is going to collide with water.
+		 * 
+		 * @param type
+		 *            What type of collision; top, right, bottom, or left.
+		 * @param object
+		 *            Object that is being checked if it will collide with
+		 *            water.
+		 * @return True if there is a collision, false otherwise.
+		 */
+		private boolean checkWaterCollision(int type, Sprite object) {
+
+			if (type == TOP_COLLISION) {
+				for (int index = 0; index < water.size(); index++) {
+					Water waterBlock = water.get(index);
+					if (object.isTopCollision(waterBlock))
+						return true;
+				}
+				return false;
+			} else if (type == RIGHT_COLLISION) {
+				for (int index = 0; index < water.size(); index++) {
+					Water waterBlock = water.get(index);
+					if (object.isRightCollision(waterBlock))
+						return true;
+				}
+				return false;
+			} else if (type == BOTTOM_COLLISION) {
+				for (int index = 0; index < water.size(); index++) {
+					Water waterBlock = water.get(index);
+					if (object.isBottomCollision(waterBlock))
+						return true;
+				}
+				return false;
+			} else if (type == LEFT_COLLISION) {
+				for (int index = 0; index < water.size(); index++) {
+					Water waterBlock = water.get(index);
+					if (object.isLeftCollision(waterBlock))
+						return true;
+				}
+				return false;
+			}
+			return false;
+		}
+
+		/**
 		 * Method to check if a chest will collide with an object.
 		 * 
 		 * @param type
@@ -322,6 +448,10 @@ public class Board extends JPanel implements Commons {
 					if (player.isTopCollision(chest)) {
 
 						if (checkTreeCollision(TOP_COLLISION, chest))
+							return true;
+						if (checkShipCollision(TOP_COLLISION, chest))
+							return true;
+						if (checkWaterCollision(TOP_COLLISION, chest))
 							return true;
 
 						for (int chestIndex = 0; chestIndex < chests.size(); chestIndex++) {
@@ -345,6 +475,10 @@ public class Board extends JPanel implements Commons {
 
 						if (checkTreeCollision(RIGHT_COLLISION, chest))
 							return true;
+						if (checkShipCollision(RIGHT_COLLISION, chest))
+							return true;
+						if (checkWaterCollision(RIGHT_COLLISION, chest))
+							return true;
 
 						for (int chestIndex = 0; chestIndex < chests.size(); chestIndex++) {
 							Treasure otherChest = chests.get(chestIndex);
@@ -365,6 +499,10 @@ public class Board extends JPanel implements Commons {
 					if (player.isBottomCollision(chest)) {
 
 						if (checkTreeCollision(BOTTOM_COLLISION, chest))
+							return true;
+						if (checkShipCollision(BOTTOM_COLLISION, chest))
+							return true;
+						if (checkWaterCollision(BOTTOM_COLLISION, chest))
 							return true;
 
 						for (int chestIndex = 0; chestIndex < chests.size(); chestIndex++) {
@@ -387,6 +525,10 @@ public class Board extends JPanel implements Commons {
 					if (player.isLeftCollision(chest)) {
 
 						if (checkTreeCollision(LEFT_COLLISION, chest))
+							return true;
+						if (checkShipCollision(LEFT_COLLISION, chest))
+							return true;
+						if (checkWaterCollision(LEFT_COLLISION, chest))
 							return true;
 
 						for (int chestIndex = 0; chestIndex < chests.size(); chestIndex++) {
@@ -425,7 +567,7 @@ public class Board extends JPanel implements Commons {
 			}
 
 			currentScore = completed;
-			
+
 			if (completed == goals.size()) {
 				finished = true;
 				repaint();
@@ -446,15 +588,28 @@ public class Board extends JPanel implements Commons {
 			}
 		}
 	}
-	
-	private class CountDownTimer implements ActionListener{
-		
-		public void actionPerformed(ActionEvent ae){
+
+	/*
+	 * private class CountDownTimer implements ActionListener{
+	 * 
+	 * public void actionPerformed(ActionEvent ae){ timeRemaining -= 1000;
+	 * 
+	 * if(timeRemaining == 0){ outOfTime = true; } repaint(); } }
+	 */
+	/*
+	 * private class CDT extends TimerTask{
+	 * 
+	 * public void run(){ timeRemaining -= 1000;
+	 * 
+	 * if(timeRemaining == 0){ outOfTime = true; } repaint(); } }
+	 */
+	private class CDT implements ActionListener {
+
+		public void actionPerformed(ActionEvent ae) {
+
 			timeRemaining -= 1000;
-			
-			if(0 == timeRemaining){
+			if(timeRemaining == 0)
 				outOfTime = true;
-			}
 			repaint();
 		}
 	}
