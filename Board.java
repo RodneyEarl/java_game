@@ -181,23 +181,25 @@ public class Board extends JPanel implements Commons {
 
 			g2d.drawString(currentScore + "/" + goals.size(),
 					BOARD_WIDTH / 2 - 25, OFFSET * 8);
-
+			g2d.drawString("Press R to restart.", 700, BOARD_HEIGHT - 40);
+			
 			if (finished) {
 				SoundEffect.SONG.stoploop();
 				timer.stop();
 
 				g2d.setColor(Color.BLACK);
 				g2d.setFont(new Font("Verdana", Font.BOLD, 48));
-				g2d.drawString("Game Over", BOARD_WIDTH / 2 - 125,
+				g2d.drawString("Game Over", 150,
 						BOARD_HEIGHT / 2);
 				if (outOfTime)
-					g2d.drawString("Out of Time", BOARD_WIDTH / 2 - 125,
+					g2d.drawString("Out of Time", 150,
 							BOARD_HEIGHT / 2 + 50);
 
 				g2d.setColor(Color.GRAY);
 				g2d.setFont(new Font("Verdana", Font.BOLD, 24));
-				g2d.drawString("Game made by Bowen Hui and Rodney Earl",
-						OFFSET, BOARD_HEIGHT - 100);
+				g2d.drawString("Game made by Bowen Hui",
+						OFFSET, BOARD_HEIGHT - 130);
+				g2d.drawString("and Rodney Earl", OFFSET, BOARD_HEIGHT - 100);
 				g2d.drawString("Music from Kevin MacLeod", OFFSET,
 						BOARD_HEIGHT - 70);
 				g2d.drawString("Sound effects from MediaCollege.com", OFFSET,
