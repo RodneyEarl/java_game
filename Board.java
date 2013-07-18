@@ -99,42 +99,60 @@ public class Board extends JPanel implements Commons {
 		Treasure chest;
 		Goal goal;
 
+		// Parse the level string and initialize objects where they need to go.
 		for (int pos = 0; pos < level.length(); pos++) {
 
 			char item = level.charAt(pos);
 
+			// New line string, reset x position and move down.
 			if (item == '\n') {
 				y += SPRITE_WIDTH;
 				x = OFFSET;
-			} else if (item == 'T') {
+			}
+			// T specifies a tree at this position.
+			else if (item == 'T') {
 				tree = new Tree(x, y);
 				trees.add(tree);
 				x += SPRITE_WIDTH;
-			} else if (item == 'W') {
+			}
+			// W specifies general water at this position.
+			else if (item == 'W') {
 				waterBlock = new Water(x, y);
 				water.add(waterBlock);
 				x += SPRITE_WIDTH;
-			} else if (item == 'S') {
+			}
+			// S specifies a ship at this position.
+			else if (item == 'S') {
 				ship = new Ship(x, y);
 				ships.add(ship);
 				x += SPRITE_WIDTH;
-			} else if (item == '$') {
+			}
+			// $ specifies treasure at this position.
+			else if (item == '$') {
 				chest = new Treasure(x, y);
 				chests.add(chest);
 				x += SPRITE_WIDTH;
-			} else if (item == '.') {
+			}
+			// . specifies a goal spot at this position.
+			else if (item == '.') {
 				goal = new Goal(x, y);
 				goals.add(goal);
 				x += SPRITE_WIDTH;
-			} else if (item == '@') {
+			}
+			// @ specifies player starting position.
+			else if (item == '@') {
 				player = new Player(x, y);
 				x += SPRITE_WIDTH;
-			} else if (item == ' ') {
+			}
+			// A blank means nothing is here.
+			else if (item == ' ') {
 				x += SPRITE_WIDTH;
 			}
 		}
 
+		// Initialize the score for the level
 		currentScore = 0;
+		// Initialize and start the timer. It will be called every one second.
 		timeRemaining = GAME_TIME;
 		timer = new Timer(1000, new CDT());
 		timer.start();
@@ -148,9 +166,11 @@ public class Board extends JPanel implements Commons {
 	 */
 	public void paint(Graphics g) {
 		super.paint(g);
+		// Set background colour.
 		g.setColor(new Color(250, 240, 170));
 		g.fillRect(0, 0, this.getWidth(), this.getHeight());
 
+		// Add all the objects to an array to loop over.
 		ArrayList<Sprite> world = new ArrayList<Sprite>();
 		world.addAll(trees);
 		world.addAll(ships);
@@ -159,6 +179,7 @@ public class Board extends JPanel implements Commons {
 		world.addAll(chests);
 		world.add(player);
 
+		// Loop over all objects in this world.
 		for (int i = 0; i < world.size(); i++) {
 
 			Sprite item = world.get(i);
@@ -170,9 +191,11 @@ public class Board extends JPanel implements Commons {
 				g.drawImage(item.getImage(), item.getX(), item.getY(), this);
 			}
 
+			// If the player is out of time, they are also finished.
 			if (outOfTime)
 				finished = true;
 
+			// Add text that will be shown all the time.
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.setColor(Color.BLACK);
 			g2d.setFont(new Font("Verdana", Font.BOLD, 24));
@@ -182,24 +205,29 @@ public class Board extends JPanel implements Commons {
 			g2d.drawString(currentScore + "/" + goals.size(),
 					BOARD_WIDTH / 2 - 25, OFFSET * 8);
 			g2d.drawString("Press R to restart.", 700, BOARD_HEIGHT - 40);
-			
+
+			// Extra text and commands to do if the player has finished.
 			if (finished) {
+				// Stop the song and timer.
 				SoundEffect.SONG.stoploop();
 				timer.stop();
 
+				// End game text.
 				g2d.setColor(Color.BLACK);
 				g2d.setFont(new Font("Verdana", Font.BOLD, 48));
-				g2d.drawString("Game Over", 150,
-						BOARD_HEIGHT / 2);
+				g2d.drawString("Game Over", 150, BOARD_HEIGHT / 2);
+				// Extra text for out of time message.
 				if (outOfTime)
-					g2d.drawString("Out of Time", 150,
-							BOARD_HEIGHT / 2 + 50);
+					g2d.drawString("Out of Time", 150, BOARD_HEIGHT / 2 + 50);
 
-				g2d.setColor(Color.GRAY);
+				// Recognition.
+				g2d.setColor(Color.BLACK);
 				g2d.setFont(new Font("Verdana", Font.BOLD, 24));
-				g2d.drawString("Game made by Bowen Hui",
-						OFFSET, BOARD_HEIGHT - 130);
-				g2d.drawString("and Rodney Earl", OFFSET, BOARD_HEIGHT - 100);
+				g2d.drawString("Game made by Bowen Hui and Rodney Earl",
+						OFFSET, BOARD_HEIGHT - 160);
+				g2d.drawString("Images by Rodney Earl", OFFSET,
+						BOARD_HEIGHT - 130);
+				g2d.drawString("and Duncan Szarmes", OFFSET, BOARD_HEIGHT - 100);
 				g2d.drawString("Music from Kevin MacLeod", OFFSET,
 						BOARD_HEIGHT - 70);
 				g2d.drawString("Sound effects from MediaCollege.com", OFFSET,
@@ -231,8 +259,10 @@ public class Board extends JPanel implements Commons {
 
 			int key = e.getKeyCode();
 
+			// Player has pressed the up key.
 			if (key == KeyEvent.VK_UP) {
 
+				// Check for collisions above the player.
 				if (checkTreeCollision(TOP_COLLISION, player)) {
 					return;
 				}
@@ -246,9 +276,12 @@ public class Board extends JPanel implements Commons {
 				if (checkChestCollision(TOP_COLLISION)) {
 					return;
 				}
-
+				// If no collision, move the player.
 				player.move(0, -SPRITE_WIDTH);
-			} else if (key == KeyEvent.VK_RIGHT) {
+			}
+			// Player has pressed the right key.
+			else if (key == KeyEvent.VK_RIGHT) {
+				// Check for collisions to the right of the player.
 				if (checkTreeCollision(RIGHT_COLLISION, player)) {
 					return;
 				}
@@ -262,9 +295,12 @@ public class Board extends JPanel implements Commons {
 				if (checkChestCollision(RIGHT_COLLISION)) {
 					return;
 				}
-
+				// If no collision, move the player.
 				player.move(SPRITE_WIDTH, 0);
-			} else if (key == KeyEvent.VK_DOWN) {
+			}
+			// Player has pressed the down key.
+			else if (key == KeyEvent.VK_DOWN) {
+				// Check for collisions below the player.
 				if (checkTreeCollision(BOTTOM_COLLISION, player)) {
 					return;
 				}
@@ -278,9 +314,12 @@ public class Board extends JPanel implements Commons {
 				if (checkChestCollision(BOTTOM_COLLISION)) {
 					return;
 				}
-
+				// If no collision, move the player.
 				player.move(0, SPRITE_WIDTH);
-			} else if (key == KeyEvent.VK_LEFT) {
+			}
+			// Player has pressed the left key.
+			else if (key == KeyEvent.VK_LEFT) {
+				// Check for collisions to the left of the player.
 				if (checkTreeCollision(LEFT_COLLISION, player)) {
 					return;
 				}
@@ -294,9 +333,11 @@ public class Board extends JPanel implements Commons {
 				if (checkChestCollision(LEFT_COLLISION)) {
 					return;
 				}
-
+				// If no collision, move the player.
 				player.move(-SPRITE_WIDTH, 0);
-			} else if (key == KeyEvent.VK_R) {
+			}
+			// Player has pressed the R key.
+			else if (key == KeyEvent.VK_R) {
 				restartLevel();
 			}
 
@@ -314,7 +355,10 @@ public class Board extends JPanel implements Commons {
 		 * @return True if there is a collision, false otherwise.
 		 */
 		private boolean checkTreeCollision(int type, Sprite object) {
-
+			/*
+			 * Check which of the four collisions is happening, and then check
+			 * if if the given object will collide with a tree.
+			 */
 			if (type == TOP_COLLISION) {
 				for (int index = 0; index < trees.size(); index++) {
 					Tree tree = trees.get(index);
@@ -358,7 +402,10 @@ public class Board extends JPanel implements Commons {
 		 * @return True if there is a collision, false otherwise.
 		 */
 		private boolean checkShipCollision(int type, Sprite object) {
-
+			/*
+			 * Check which of the four collisions is happening, and then check
+			 * if if the given object will collide with a ship.
+			 */
 			if (type == TOP_COLLISION) {
 				for (int index = 0; index < ships.size(); index++) {
 					Ship ship = ships.get(index);
@@ -402,7 +449,10 @@ public class Board extends JPanel implements Commons {
 		 * @return True if there is a collision, false otherwise.
 		 */
 		private boolean checkWaterCollision(int type, Sprite object) {
-
+			/*
+			 * Check which of the four collisions is happening, and then check
+			 * if if the given object will collide with any water.
+			 */
 			if (type == TOP_COLLISION) {
 				for (int index = 0; index < water.size(); index++) {
 					Water waterBlock = water.get(index);
@@ -443,7 +493,13 @@ public class Board extends JPanel implements Commons {
 		 * @return True if there is a collision, false otherwise.
 		 */
 		private boolean checkChestCollision(int type) {
-
+			/*
+			 * Check which of the four collisions is happening, and then check
+			 * if if the given object will collide with a chest. Also need to
+			 * check if the chest will collide with trees, water, ships or other
+			 * chests. If not, then move the chest and check if the player has
+			 * finished.
+			 */
 			if (type == TOP_COLLISION) {
 				for (int index = 0; index < chests.size(); index++) {
 					Treasure chest = chests.get(index);
@@ -557,7 +613,7 @@ public class Board extends JPanel implements Commons {
 		public void checkEndState() {
 
 			int completed = 0;
-
+			// Check if the chests are in the goal squares.
 			for (int chestIndex = 0; chestIndex < chests.size(); chestIndex++) {
 				Treasure chest = (Treasure) chests.get(chestIndex);
 				for (int goalIndex = 0; goalIndex < goals.size(); goalIndex++) {
@@ -567,9 +623,9 @@ public class Board extends JPanel implements Commons {
 						completed++;
 				}
 			}
-
+			// Current score is the number of chests in goal squares.
 			currentScore = completed;
-
+			// If all goal squares are filled, then the player is finished.
 			if (completed == goals.size()) {
 				finished = true;
 				repaint();
@@ -591,26 +647,25 @@ public class Board extends JPanel implements Commons {
 		}
 	}
 
-	/*
-	 * private class CountDownTimer implements ActionListener{
+	/**
+	 * Custom class for the timer.
 	 * 
-	 * public void actionPerformed(ActionEvent ae){ timeRemaining -= 1000;
-	 * 
-	 * if(timeRemaining == 0){ outOfTime = true; } repaint(); } }
-	 */
-	/*
-	 * private class CDT extends TimerTask{
-	 * 
-	 * public void run(){ timeRemaining -= 1000;
-	 * 
-	 * if(timeRemaining == 0){ outOfTime = true; } repaint(); } }
+	 * @author Rodney Earl
 	 */
 	private class CDT implements ActionListener {
 
+		/**
+		 * Method called after actions are performed or after specified
+		 * intervals.
+		 * 
+		 * @param ae
+		 *            An action event. Not used in this custom timer.
+		 */
 		public void actionPerformed(ActionEvent ae) {
-
+			// Decrement the time remaining by one second.
 			timeRemaining -= 1000;
-			if(timeRemaining == 0)
+			// If time remaining is 0, then the player is out of time.
+			if (timeRemaining == 0)
 				outOfTime = true;
 			repaint();
 		}
