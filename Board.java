@@ -637,6 +637,7 @@ public class Board extends JPanel implements Commons {
 		 */
 		public void restartLevel() {
 
+			timer.stop();
 			goals.clear();
 			chests.clear();
 			trees.clear();
