@@ -204,8 +204,12 @@ public class Board extends JPanel implements Commons {
 
 			g2d.drawString(currentScore + "/" + goals.size(),
 					BOARD_WIDTH / 2 - 25, OFFSET * 8);
-			g2d.drawString("Press R to restart.", 700, BOARD_HEIGHT - 40);
-
+			
+			//Only show restart message during game.
+			if(!finished){
+				g2d.drawString("Press R to restart.", 700, BOARD_HEIGHT - 40);
+			}
+			
 			// Extra text and commands to do if the player has finished.
 			if (finished) {
 				// Stop the song and timer.
